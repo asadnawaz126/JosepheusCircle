@@ -19,13 +19,14 @@ class CircularList {
 
 public:
 	int count = 0;
-	void deletePerson(int skips);
-	void createPerson(string name);
-	void displayList();
+	int called = 0; //number of times display has been called.
+	void deletePerson(int skips, ofstream& file);
+	void createPerson(string name, ofstream& file);
+	void displayList(ofstream& file);
 };
 
 
-void CircularList::createPerson(string name) {
+void CircularList::createPerson(string name, ofstream& file) {
 	personNode *newPerson = new personNode;
 
 	newPerson->name = name;
@@ -46,7 +47,7 @@ void CircularList::createPerson(string name) {
 	//cout << newPerson->name<< endl;
 
 }
-void CircularList::deletePerson(int skips) {
+void CircularList::deletePerson(int skips, ofstream& file) {
 
 	personNode *curr = head;
 
@@ -59,10 +60,7 @@ void CircularList::deletePerson(int skips) {
 
 	else if (count==1) {
 
-		curr = head->next;
-		delete head;
-		tail->next = curr;
-		head = curr;
+		file << "Cannot execute only person" << endl;
 	}
 
 	else if (count>1){
@@ -78,7 +76,7 @@ void CircularList::deletePerson(int skips) {
 				prevPerson->next = curr->next;
 				head = prevPerson;
 				//cout << endl << "Head is :" << head->name << endl;
-				cout << "Deleted: " << curr->name << endl;
+				file << curr->name << " Executed."<<endl;
 				delete curr;
 				count--;
 				break;
@@ -87,7 +85,7 @@ void CircularList::deletePerson(int skips) {
 				prevPerson->next = curr->next;
 				head = prevPerson;
 				//cout << endl << "Head is :" << head->name << endl;
-				cout << "Deleted: " << curr->name << endl;
+				file << curr->name<<" executed." << endl;
 				delete curr;
 				count--;
 				break;
@@ -99,23 +97,36 @@ void CircularList::deletePerson(int skips) {
 
 }
 
-void CircularList::displayList() {
+void CircularList::displayList(ofstream& file) {
 	
 	personNode *temp = head;
+	called++;
 
-	if (count == 1) {
-		cout << head->name<<" survived";
+	if (called==1) {
+		if (count == 1)
+			file << head->name<<endl;
+		else{
+			while (temp->next != head) {
+				file << temp->name << endl;
+				temp = temp->next;
+			}
+		}
+		
 	}
-	while (temp->next != head) {
-		cout << temp->name << endl;
-		temp = temp->next;
+	else{
+		file<< head->name << " survived";
 	}
+	
 
 
 }
 
 
 int main() {
+
+
+	ofstream newFile;
+	newFile.open("output.txt");
 
 	CircularList list;
 
@@ -148,22 +159,23 @@ int main() {
 		
 		else if(read != "AC") {
 			people.push_back(read);
-			list.createPerson(read);
+			list.createPerson(read, newFile);
 		}
 
 	}
 
-	list.displayList();
-
-	cout << endl;
+	list.displayList(newFile);
+	newFile << endl;
 
 	for (int i = 0;i < skips.size();i++) {
 
-		list.deletePerson(skips[i]);
+		list.deletePerson(skips[i], newFile);
 		
 	}
-	cout << endl;
-	list.displayList();
+	newFile << endl;
+	list.displayList(newFile);
+
+	newFile.close();
 
 
 	getchar();
